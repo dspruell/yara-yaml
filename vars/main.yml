@@ -1,0 +1,12 @@
+--
+# Main variables file
+
+import_all_modules_auto: true
+import_modules_list:
+  - dotnet
+  - elf
+  - hash
+  - magic
+  - math
+  - pe
+  - time

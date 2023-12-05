@@ -1,0 +1,8 @@
+--
+# Macros
+# Store sets of strings or other values that are expanded for use in
+# rule bodies.
+
+redirector_ehihm302_cookie_names:
+  - ehihm302
+

@@ -1,0 +1,46 @@
+---
+# malicious-traffic-distribution.yml
+# Rules for malicious traffic distribution based detections
+
+- rule_name: '{{ rule_category }}_ehihm302_Redirector_Cookie_01'
+  rule_description: >
+    ehihm302 Malicious Redirector. ehihm302 is the characteristic name
+    of a cookie set via Keitaro TDS by a threat actor that distributes
+    web traffic to malicious payloads.
+  rule_category: HA
+  rule_author: Darren Spruell
+  rule_created: 2014-10-13
+  rule_last_modified: 2016-12-09
+  rule_revision: 3
+  rule_scores:
+    confidence: 9
+    severity: 6
+  rule_id: '{{ autoassign_rule_id_on_commit }}'
+  references:
+    public:
+      urls:
+        - 'https://research.riskiq.net/threatfacts/trafficdist/ehihm302/detail/'
+    private:
+      tracking_cases:
+        - 'https://www.notion.so/inquest-portal/ehihm302-Redirector-deadbeefdeadbeefdeadbeefdeadbeef'
+  yara_tags:
+    - redirector
+    - ehihm302
+  threat_tag: ehihm302
+  rule_tags:
+    - inquest:intel-type="capability-intel"
+    - inquest:rule-source="riskiq"
+    - inquest:threat-id="ehihm302"
+    - inquest:threat-era="historical"
+  rule_text: |
+    rule {{ rule_name }}{% if yara_tags %} : {{ yara_tags |join(' ') }}{% endif %}
+    {
+      meta:
+        {{ inject_meta }}
+      condition:
+        response_headers matches /^Set-Cookie: {{ redirector_ehihm302_cookie_names |regexp_alternation }}=/
+    }
+### Examples
+# Set-Cookie: ehihm=3mIcADE3AAIAAgDvVDlU___vVDlUQAABAAAA71Q5VAA-; expires=Sun, 11-Oct-2015 16:03:59 GMT; path=/; domain=gilacave.dnschk.info
+# Set-Cookie: ehihm=ju4cADE3AAIAAgAEOjlU__8EOjlUQAABAAAABDo5VAA-; expires=Sun, 11-Oct-2015 14:09:08 GMT; path=/; domain=gilacave.gnanaselvam.ch
+# Set-Cookie: ehihm=ntwcADE3AAIAAgCcMTlU__.cMTlUQAABAAAAnDE5VAA-; expires=Sun, 11-Oct-2015 13:33:16 GMT; path=/; domain=gilacave.rronqui.net
