@@ -1,9 +1,10 @@
 ---
 # malicious-traffic-distribution.yml
-# Rules for malicious traffic distribution based detections
+#
+# Rules for malicious traffic distribution based threats.
 
 - rule_name: '{{ rule_category }}_ehihm302_Redirector_Cookie_01'
-  rule_description: >
+  rule_description: >-
     ehihm302 Malicious Redirector. ehihm302 is the characteristic name
     of a cookie set via Keitaro TDS by a threat actor that distributes
     web traffic to malicious payloads.
@@ -23,10 +24,10 @@
     private:
       tracking_cases:
         - 'https://www.notion.so/inquest-portal/ehihm302-Redirector-deadbeefdeadbeefdeadbeefdeadbeef'
+      urls: []
   yara_tags:
     - redirector
     - ehihm302
-  threat_tag: ehihm302
   rule_tags:
     - inquest:intel-type="capability-intel"
     - inquest:rule-source="riskiq"
