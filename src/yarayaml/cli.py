@@ -4,6 +4,8 @@ import logging
 from argparse import ArgumentParser
 from importlib.metadata import version
 
+from tabulate import tabulate
+
 from .builder import YamlRuleBuilder
 
 __application_name__ = "yara-yaml"
@@ -12,15 +14,14 @@ __version__ = version(__application_name__)
 DEFAULT_RULES_PATH = "rules"
 LOG_LEVELS = ["critical", "error", "warning", "info", "debug"]
 DEFAULT_LOG_LEVEL = "warning"
+DEFAULT_RULE_TEMPLATE = "default"
 
 logging.basicConfig(
-    format="%(asctime)s [%(levelname)s] %(module)s:%(lineno)s %(message)s",
+    format="%(asctime)s [%(levelname)s] %(module)s:%(lineno)s - %(message)s",
     level=DEFAULT_LOG_LEVEL.upper(),
 )
 
 logger = logging.getLogger(__name__)
-# XXX
-print("logger in cli:", logger)
 
 
 def main():
@@ -32,6 +33,12 @@ def main():
         nargs="?",
         default=DEFAULT_RULES_PATH,
         help="path to YAML rules directory or file (default: %(default)s)",
+    )
+    parser.add_argument(
+        "--list-templates",
+        "-L",
+        action="store_true",
+        help="list available rule templates",
     )
     parser.add_argument(
         "--log-level",
@@ -50,12 +57,17 @@ def main():
     args = parser.parse_args()
 
     logging.getLogger().setLevel(args.log_level.upper())
-    # XXX
-    print("logger in cli:", logger)
 
     builder = YamlRuleBuilder(args.rules_path)
-    # ruleset = builder.get_yara_rules()
-    # ruleset = builder.load_yaml_rules()
-    for rule in builder.load_yaml_rules():
+
+    # If templates list was requested, print it out and exit
+    if args.list_templates:
+        templates = builder.list_rule_templates()
+        print(tabulate(templates))
+        parser.exit()
+
+    # Build rules and emit as output
+    # for rule in builder.load_yaml_rules():
+    #     print(rule)
+    for rule in builder.get_yara_rules():
         print(rule)
-    # print(ruleset)
