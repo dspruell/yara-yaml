@@ -10,3 +10,4 @@ import_modules_list:
   - math
   - pe
   - time
+autoassign_rule_id_on_commit: '%%INQUEST_AUTOASSIGN_RULE_ID_ON_COMMIT%%'

@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 LOREM = "rule test { condition: true }"
 RULE_TEMPLATE_DIR = "templates"
-RULE_TEMPLATE_SUFFIX = "yar.j2"
+RULE_TEMPLATE_SUFFIX = "yar.tmpl"
 RULE_YAML_SUFFIX = "yml"
 
 
