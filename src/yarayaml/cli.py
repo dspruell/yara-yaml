@@ -35,21 +35,27 @@ def main():
         help="path to YAML rules directory or file (default: %(default)s)",
     )
     parser.add_argument(
-        "--list-templates",
+        "-t",
+        "--template-name",
+        default=DEFAULT_RULE_TEMPLATE,
+        help="template with which to render YAML rules (default: %(default)s)",
+    )
+    parser.add_argument(
         "-L",
+        "--list-templates",
         action="store_true",
         help="list available rule templates",
     )
     parser.add_argument(
-        "--log-level",
         "-l",
+        "--log-level",
         choices=LOG_LEVELS,
         default=DEFAULT_LOG_LEVEL,
         help="set logging level",
     )
     parser.add_argument(
-        "--version",
         "-V",
+        "--version",
         version=__version__,
         action="version",
         help="show program version",
@@ -58,12 +64,12 @@ def main():
 
     logging.getLogger().setLevel(args.log_level.upper())
 
-    builder = YamlRuleBuilder(args.rules_path)
+    builder = YamlRuleBuilder(args.rules_path, template=args.template_name)
 
     # If templates list was requested, print it out and exit
     if args.list_templates:
         templates = builder.list_rule_templates()
-        print(tabulate(templates))
+        print(tabulate(templates, tablefmt="plain"))
         parser.exit()
 
     # Build rules and emit as output

@@ -1,33 +1,26 @@
 {% if rule_private is defined %}private {% endif %}rule {{ rule_category }}_{{ rule_name }}{% if yara_tags %} : {{ yara_tags |join(' ') }}{% endif %}
 {
     meta:
-        Description = "{{ rule_description }}"
-        Category = "{% include 'categories.tmpl' %}"
-        Author = "{{ rule_author }}"
-        Created_Date = "{{ rule_created }}"
-        Last_Modified_Date = "{{ rule_last_modified }}"
+        EventID = "{{ rule_id }}"
         Revision = "{{ rule_revision }}"
+        Category = "{{ rule_categories[rule_category] }}"
+        Description = "{{ rule_description }}"
+        Author = "{{ rule_author }}"
         Confidence = {{ rule_scores.confidence }}
         Severity = {{ rule_scores.severity }}
-        EventID = "{{ rule_id }}"
-        {% if references.public.urls %}
-          {% set n = cycler(range(1,100)) %}
-          {% for u in references.public.urls %}
-            Reference{{ n.next() }} = "{{ u }}"
-          {% endfor %}
-        {% endif %}
-        {% if rule_tags %}
-          {% set n = cycler(range(1,100)) %}
-          {% for t in rule_tags %}
-            Tag{{ n.next() }} = "{{ t }}"
-          {% endfor %}
-        {% endif %}
-        
+        Created_Date = "{{ rule_created }}"
+        Last_Modified_Date = "{{ rule_last_modified }}"
+        {%- for k, v in (references.public.urls |list_as_meta('Reference')).items() %}
+        {{ k }} = "{{ v }}"
+        {%- endfor %}
+        {%- for k, v in (rule_tags |list_as_meta('Tag')).items() %}
+        {{ k }} = "{{ v|replace('"', '\\"') }}"
+        {%- endfor %}
 {% if rule_strings %}
     strings:
-        {{ rule_strings }}
-{% endif %}
+        {{ rule_strings|indent(8) }}
+{%- endif %}
     condition:
-        {{ rule_condition }}
+        {{ rule_condition|indent(8) }}
 }
 

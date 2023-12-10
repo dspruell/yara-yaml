@@ -1,4 +1,4 @@
---
+---
 # Main variables file
 
 import_all_modules_auto: true
@@ -11,3 +11,10 @@ import_modules_list:
   - pe
   - time
 autoassign_rule_id_on_commit: '%%INQUEST_AUTOASSIGN_RULE_ID_ON_COMMIT%%'
+rule_categories:
+  EC: Evasion Characteristic
+  FC: File Characteristic
+  FID: File ID
+  HA: Header Analytic
+  MC: Malicious Characteristic
+  SC: Suspicious Characteristic

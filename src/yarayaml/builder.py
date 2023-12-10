@@ -13,44 +13,68 @@ try:
 except ImportError:
     from yaml import SafeLoader
 
+from .filters import list_as_meta, regexpalt
+
+# List all imported filter functions (these are later registered)
+jinja_filters = [list_as_meta, regexpalt]
 
 logger = logging.getLogger(__name__)
 
 LOREM = "rule test { condition: true }"
 RULE_TEMPLATE_DIR = "templates"
+VARS_DIR = "vars"
 RULE_TEMPLATE_SUFFIX = "yar.tmpl"
 RULE_YAML_SUFFIX = "yml"
 
 
 class YamlRuleBuilder:
-    "XXX Conceptual class to house YARA ruleset builder logic"
+    """YARA rule builder.
 
-    def __init__(self, rules_path, template="default"):
-        """Invoke new YARA rule builder.
+    Arguments
+    ---------
+    rules_path : str
+        Filesystem path to rules directory root or a rules file containing
+        YAML formatted rule content
+    template : str
+        Name of rule template to use for building rules from rules file
+        content. The specified name is appended with the rule template
+        suffix to form the file name to use.
+    """
 
-        Arguments
-        ---------
-        rules_path : str
-            Filesystem path to rules directory root or a rules file containing
-            YAML formatted rule content
-        template : str, optional
-            Name of rule template to use for building rules from rules file
-            content. The specified name is appended with the rule template
-            suffix to form the file name to use.
-        """
+    def __init__(self, rules_path, template):
         self.rules_path = rules_path
+
+        # Load the variable files from VARS_DIR and pass them as context
+        # into the environment object
+        global_vars = {}
+        p = Path(VARS_DIR)
+        for varfile in p.iterdir():
+            logger.debug("varfile: %s", varfile)
+            with open(varfile, "rb") as f:
+                global_vars.update(load(f, Loader=SafeLoader))
+        logger.debug("global_vars: %s", global_vars)
+
         template_file = f"{template}.{RULE_TEMPLATE_SUFFIX}"
-        env = Environment(loader=FileSystemLoader(RULE_TEMPLATE_DIR))
-        self.template = env.get_template(template_file)
+        env = Environment(
+            loader=FileSystemLoader(RULE_TEMPLATE_DIR),
+        )
+        # Register imported filter functions
+        for f in jinja_filters:
+            env.filters[f.__name__] = f
+        logging.debug("env.filters: %s", env.filters)
+        self.template = env.get_template(template_file, globals=global_vars)
 
     def list_rule_templates(self):
         "List all templates in the configured templates directory"
+
         p = Path(RULE_TEMPLATE_DIR)
         contents = list(p.iterdir())
         logger.info("listing a total of %d templates", len(contents))
-        return [[str(_) for _ in contents]]
+        return [[str(_)] for _ in contents]
 
     def apply_templating(self, context):
+        "Render the template"
+
         return self.template.render(context)
 
     def load_yaml_rules(self):
@@ -87,7 +111,8 @@ class YamlRuleBuilder:
         logger.debug("self.ruleset: %s", self.ruleset)
 
     def get_yara_rules(self):
-        "XXX conceptual method to templatize and return ruleset"
+        "Templatize and return ruleset"
+
         logger.info("preparing to build ruleset from %s", self.rules_path)
         # XXX return dummy rule for now
         # return LOREM

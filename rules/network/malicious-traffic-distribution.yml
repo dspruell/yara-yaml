@@ -20,7 +20,8 @@
   references:
     public:
       urls:
-        - 'https://research.riskiq.net/threatfacts/trafficdist/ehihm302/detail/'
+        - https://blog.sucuri.net/2014/09/conditional-malicious-iframe-targeting-wordpress-web-sites.html
+        - https://research.riskiq.net/threatfacts/trafficdist/ehihm302/detail/
     private:
       tracking_cases:
         - 'https://www.notion.so/inquest-portal/ehihm302-Redirector-deadbeefdeadbeefdeadbeefdeadbeef'
@@ -34,7 +35,7 @@
     - inquest:threat-id="ehihm302"
     - inquest:threat-era="historical"
   rule_condition: |
-        response_headers matches /^Set-Cookie: {{ redirector_ehihm302_cookie_names |regexp_alternation }}=/
+    response_headers matches /^Set-Cookie: {{ redirector_ehihm302_cookie_names|regexpalt }}=/
 ### Examples
 # Set-Cookie: ehihm=3mIcADE3AAIAAgDvVDlU___vVDlUQAABAAAA71Q5VAA-; expires=Sun, 11-Oct-2015 16:03:59 GMT; path=/; domain=gilacave.dnschk.info
 # Set-Cookie: ehihm=ju4cADE3AAIAAgAEOjlU__8EOjlUQAABAAAABDo5VAA-; expires=Sun, 11-Oct-2015 14:09:08 GMT; path=/; domain=gilacave.gnanaselvam.ch
