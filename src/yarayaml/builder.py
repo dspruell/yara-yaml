@@ -5,8 +5,8 @@ import os
 from os.path import join
 from pathlib import Path
 
-from jinja2 import Environment, FileSystemLoader
-from yaml import load
+from jinja2 import Environment, FileSystemLoader, FunctionLoader
+from yaml import load as yaml_load
 
 try:
     from yaml import CSafeLoader as SafeLoader
@@ -15,16 +15,16 @@ except ImportError:
 
 from .filters import list_as_meta, regexpalt
 
-# List all imported filter functions (these are later registered)
+# List all imported filter functions to later be registered
 jinja_filters = [list_as_meta, regexpalt]
 
 logger = logging.getLogger(__name__)
 
-LOREM = "rule test { condition: true }"
 RULE_TEMPLATE_DIR = "templates"
 VARS_DIR = "vars"
+RULE_MACRO_DIR = "vars/macros"
 RULE_TEMPLATE_SUFFIX = "yar.tmpl"
-RULE_YAML_SUFFIX = "yml"
+YAML_SUFFIX = "yml"
 
 
 class YamlRuleBuilder:
@@ -44,38 +44,97 @@ class YamlRuleBuilder:
     def __init__(self, rules_path, template):
         self.rules_path = rules_path
 
+        # Load macros from files from RULE_MACRO_DIR and build a context
+        self.macros_context = {}
+        mp = Path(RULE_MACRO_DIR)
+        for macrofile in mp.iterdir():
+            # Include only macros files
+            if (
+                macrofile.is_file()
+                and macrofile.suffix.lstrip(".") == YAML_SUFFIX
+            ):
+                logger.debug("loading macros from file: %s", macrofile)
+                with open(macrofile, "rb") as f:
+                    self.macros_context.update(yaml_load(f, Loader=SafeLoader))
+        logger.debug("self.macros_context: %s", self.macros_context)
+
         # Load the variable files from VARS_DIR and pass them as context
-        # into the environment object
-        global_vars = {}
-        p = Path(VARS_DIR)
-        for varfile in p.iterdir():
-            logger.debug("varfile: %s", varfile)
-            with open(varfile, "rb") as f:
-                global_vars.update(load(f, Loader=SafeLoader))
-        logger.debug("global_vars: %s", global_vars)
+        # into the environment object. This requires ensuring that only regular
+        # files are loaded.
+        self.global_vars = {}
+        vp = Path(VARS_DIR)
+        for varfile in vp.iterdir():
+            # Include only vars files
+            if varfile.is_file() and varfile.suffix.lstrip(".") == YAML_SUFFIX:
+                logger.debug("loading variables from file: %s", varfile)
+                with open(varfile, "rb") as f:
+                    self.global_vars.update(yaml_load(f, Loader=SafeLoader))
+        logger.debug("self.global_vars: %s", self.global_vars)
 
         template_file = f"{template}.{RULE_TEMPLATE_SUFFIX}"
-        env = Environment(
+        rule_env = Environment(
             loader=FileSystemLoader(RULE_TEMPLATE_DIR),
         )
         # Register imported filter functions
         for f in jinja_filters:
-            env.filters[f.__name__] = f
-        logging.debug("env.filters: %s", env.filters)
-        self.template = env.get_template(template_file, globals=global_vars)
+            rule_env.filters[f.__name__] = f
+        logging.debug("rule_env.filters: %s", rule_env.filters)
+        self.rule_template = rule_env.get_template(
+            template_file, globals=self.global_vars
+        )
 
     def list_rule_templates(self):
         "List all templates in the configured templates directory"
 
-        p = Path(RULE_TEMPLATE_DIR)
-        contents = list(p.iterdir())
+        tp = Path(RULE_TEMPLATE_DIR)
+        contents = list(tp.iterdir())
         logger.info("listing a total of %d templates", len(contents))
         return [[str(_)] for _ in contents]
 
-    def apply_templating(self, context):
-        "Render the template"
+    def apply_templating(self, template, context):
+        "Render specified template using the given context"
 
-        return self.template.render(context)
+        def load_rule_field(name):
+            """Load rule context section for templatization.
+
+            Load specified section of rule context as template for applying
+            macro transformation.
+            """
+            if name == "strings":
+                return rule_strings
+            elif name == "condition":
+                return rule_condition
+            else:
+                raise ValueError(f"Unsupported name specified: {name}")
+
+        # Run loaded rule context strings and condition through
+        # templating to apply macros.
+        rule_strings = context.get("rule_strings")
+        rule_condition = context.get("rule_condition")
+        macro_env = Environment(
+            loader=FunctionLoader(load_rule_field),
+        )
+        # Register imported filter functions
+        for f in jinja_filters:
+            macro_env.filters[f.__name__] = f
+        logging.debug("macro_env.filters: %s", macro_env.filters)
+        if rule_strings:
+            rule_strings_template = macro_env.get_template(
+                "strings", globals=self.global_vars
+            )
+            context["rule_strings"] = rule_strings_template.render(
+                self.macros_context
+            )
+        if rule_condition:
+            rule_condition_template = macro_env.get_template(
+                "condition", globals=self.global_vars
+            )
+            context["rule_condition"] = rule_condition_template.render(
+                self.macros_context
+            )
+        # Finally, run the updated complete rule context through
+        # templatization.
+        return template.render(context)
 
     def load_yaml_rules(self):
         """Load rules dict from YAML files.
@@ -85,37 +144,39 @@ class YamlRuleBuilder:
         directory tree to find and load them.
 
         TODO: Support Path.walk() interface, available in Python 3.12.
+
+        XXX: We currently only load the specified rules when the argument is a
+        single rule file. Complete support to load multiple files in a
+        directory tree.
         """
         rules_files = []
-        p = Path(self.rules_path)
+        rp = Path(self.rules_path)
         logger.debug("configured rules_path: %s", self.rules_path)
-        if p.is_file():
+        if rp.is_file():
             # Add YAML file to the load list
-            if p.suffix.lstrip(".") == RULE_YAML_SUFFIX:
-                rules_files.append(p)
-        elif p.is_dir():
+            if rp.suffix.lstrip(".") == YAML_SUFFIX:
+                rules_files.append(rp)
+        elif rp.is_dir():
             # Walk the directory tree and add files to process
-            for root, dirs, files in os.walk(p):
+            for root, dirs, files in os.walk(rp):
                 logging.debug("root: %s", root)
                 logging.debug("dirs: %s", dirs)
                 logging.debug("files: %s", files)
                 for name in files:
                     logging.debug("suffix of %s: %s", name, Path(name).suffix)
-                    if Path(name).suffix.lstrip(".") == RULE_YAML_SUFFIX:
+                    if Path(name).suffix.lstrip(".") == YAML_SUFFIX:
                         rules_files.append(join(root, name))
 
         logger.info("found %d YAML rule file(s) to process", len(rules_files))
         logger.debug("rules_files: %s", rules_files)
         with open(self.rules_path, "rb") as f:
-            self.ruleset = load(f, Loader=SafeLoader)
+            self.ruleset = yaml_load(f, Loader=SafeLoader)
         logger.debug("self.ruleset: %s", self.ruleset)
 
     def get_yara_rules(self):
         "Templatize and return ruleset"
 
         logger.info("preparing to build ruleset from %s", self.rules_path)
-        # XXX return dummy rule for now
-        # return LOREM
         self.load_yaml_rules()
         for r in self.ruleset:
-            yield self.apply_templating(r)
+            yield self.apply_templating(self.rule_template, r)
