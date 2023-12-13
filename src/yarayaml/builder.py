@@ -174,9 +174,18 @@ class YamlRuleBuilder:
         logger.debug("self.ruleset: %s", self.ruleset)
 
     def get_yara_rules(self):
-        "Templatize and return ruleset"
+        """Templatize and return ruleset.
+
+        It's not clear if the multiple `yield` statements in this method is
+        non-pythonic, but it works.
+        """
 
         logger.info("preparing to build ruleset from %s", self.rules_path)
         self.load_yaml_rules()
+        logger.debug("will output %d rule(s)", len(self.ruleset))
+        if self.ruleset:
+            if self.global_vars.get("import_all_modules_auto"):
+                for module in self.global_vars["import_modules_list"]:
+                    yield f'import "{module}"'
         for r in self.ruleset:
             yield self.apply_templating(self.rule_template, r)

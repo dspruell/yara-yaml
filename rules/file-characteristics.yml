@@ -34,6 +34,6 @@
     - inquest:rule-source="inquest"
     - inquest:capability="url-shortener"
   rule_strings: |
-    $s = /{{ url_shortener_domains|regexpalt }}
+    $s = /{{ url_shortener_domains|regexpalt }}/ nocase ascii wide
   rule_condition: |
     any of them
