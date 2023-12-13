@@ -30,7 +30,7 @@
     - redirector
     - ehihm302
   rule_tags:
-    - inquest:intel-type="capability-intel"
+    - inquest:intel-type="capability-intelligence"
     - inquest:rule-source="riskiq"
     - inquest:threat-id="ehihm302"
     - inquest:threat-era="historical"

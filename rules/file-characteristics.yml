@@ -1,0 +1,39 @@
+---
+# file-characteristics.yml
+#
+# Rules for notable characteristics in various types of files.
+
+- rule_name: File_with_URL_Shortener_Reference
+  rule_description: >-
+    Adversaries may abuse URL shortener services to hide malicious content
+    behind a legitimate domain in an attempt by evade detection. This
+    signature identifies files that contain references to known URL
+    shortener service domains.
+  rule_category: FC
+  rule_author: Darren Spruell
+  rule_created: 2023-12-12
+  rule_last_modified: 2023-12-12
+  rule_revision: 1
+  rule_scores:
+    confidence: 9
+    severity: 2
+  rule_id: '{{ autoassign_rule_id_on_commit }}'
+  references:
+    public:
+      mitre-attack-techniques:
+        - T1608.005 # Stage Capabilities: Link Target
+      urls:
+        - https://safecomputing.umich.edu/be-aware/phishing-and-suspicious-email/shortened-url-security
+    private:
+      tracking_cases:
+        - 'https://www.notion.so/inquest-portal/URL-Shorteners-deadbeefdeadbeefdeadbeefdeadbeef'
+  yara_tags:
+    - url_shortener
+  rule_tags:
+    - inquest:intel-type="capability-intelligence"
+    - inquest:rule-source="inquest"
+    - inquest:capability="url-shortener"
+  rule_strings: |
+    $s = /{{ url_shortener_domains|regexpalt }}
+  rule_condition: |
+    any of them

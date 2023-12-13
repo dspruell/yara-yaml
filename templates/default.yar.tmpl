@@ -20,7 +20,9 @@
     strings:
         {{ rule_strings|indent(8) }}
 {%- endif %}
+{% if rule_condition %}
     condition:
         {{ rule_condition|indent(8) }}
+{%- endif %}
 }
 
