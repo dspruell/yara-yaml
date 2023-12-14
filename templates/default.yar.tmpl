@@ -1,7 +1,7 @@
 {% if rule_private is defined %}private {% endif %}rule {{ rule_category }}_{{ rule_name }}{% if yara_tags %} : {{ yara_tags |join(' ') }}{% endif %}
 {
     meta:
-        EventID = "{{ rule_id }}"
+        EventID = "{{ rule_id |default(autoassign_rule_id_on_commit) }}"
         Revision = "{{ rule_revision }}"
         Category = "{{ rule_categories[rule_category] }}"
         Description = "{{ rule_description }}"

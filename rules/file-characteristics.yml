@@ -17,7 +17,7 @@
   rule_scores:
     confidence: 9
     severity: 2
-  rule_id: '{{ autoassign_rule_id_on_commit }}'
+  rule_id: 999999
   references:
     public:
       mitre-attack-techniques:

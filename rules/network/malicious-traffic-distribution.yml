@@ -16,7 +16,6 @@
   rule_scores:
     confidence: 9
     severity: 6
-  rule_id: '{{ autoassign_rule_id_on_commit }}'
   references:
     public:
       urls:
