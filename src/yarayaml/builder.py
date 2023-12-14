@@ -43,6 +43,7 @@ class YamlRuleBuilder:
 
     def __init__(self, rules_path, template):
         self.rules_path = rules_path
+        self.template_name = template
 
         # Load macros from files from RULE_MACRO_DIR and build a context
         self.macros_context = {}
@@ -61,35 +62,40 @@ class YamlRuleBuilder:
         # Load the variable files from VARS_DIR and pass them as context
         # into the environment object. This requires ensuring that only regular
         # files are loaded.
-        self.global_vars = {}
+        self.global_context = {}
         vp = Path(VARS_DIR)
         for varfile in vp.iterdir():
             # Include only vars files
             if varfile.is_file() and varfile.suffix.lstrip(".") == YAML_SUFFIX:
                 logger.debug("loading variables from file: %s", varfile)
                 with open(varfile, "rb") as f:
-                    self.global_vars.update(yaml_load(f, Loader=SafeLoader))
-        logger.debug("self.global_vars: %s", self.global_vars)
+                    self.global_context.update(yaml_load(f, Loader=SafeLoader))
+        logger.debug("self.global_context: %s", self.global_context)
 
-        template_file = f"{template}.{RULE_TEMPLATE_SUFFIX}"
-        rule_env = Environment(
+        template_file = f"{self.template_name}.{RULE_TEMPLATE_SUFFIX}"
+        self.rule_env = Environment(
             loader=FileSystemLoader(RULE_TEMPLATE_DIR),
         )
         # Register imported filter functions
         for f in jinja_filters:
-            rule_env.filters[f.__name__] = f
-        logging.debug("rule_env.filters: %s", rule_env.filters)
-        self.rule_template = rule_env.get_template(
-            template_file, globals=self.global_vars
+            self.rule_env.filters[f.__name__] = f
+        logging.debug("rule_env.filters: %s", self.rule_env.filters)
+        self.rule_template = self.rule_env.get_template(
+            template_file, globals=self.global_context
         )
 
     def list_rule_templates(self):
-        "List all templates in the configured templates directory"
+        """List all templates in the configured templates directory.
 
-        tp = Path(RULE_TEMPLATE_DIR)
-        contents = list(tp.iterdir())
-        logger.info("listing a total of %d templates", len(contents))
-        return [[str(_)] for _ in contents]
+        Return a list of dictionaries for the caller to render. Dictionary keys
+        are the name of the template (the name the caller may specify) and the
+        filename of the template.
+        """
+        templates = []
+        suf = RULE_TEMPLATE_SUFFIX.split(".")[-1]
+        for t in self.rule_env.list_templates(extensions=[suf]):
+            templates.append({"name": t.split(".")[0], "template file": t})
+        return templates
 
     def apply_templating(self, template, context):
         "Render specified template using the given context"
@@ -120,14 +126,14 @@ class YamlRuleBuilder:
         logging.debug("macro_env.filters: %s", macro_env.filters)
         if rule_strings:
             rule_strings_template = macro_env.get_template(
-                "strings", globals=self.global_vars
+                "strings", globals=self.global_context
             )
             context["rule_strings"] = rule_strings_template.render(
                 self.macros_context
             )
         if rule_condition:
             rule_condition_template = macro_env.get_template(
-                "condition", globals=self.global_vars
+                "condition", globals=self.global_context
             )
             context["rule_condition"] = rule_condition_template.render(
                 self.macros_context
@@ -184,8 +190,12 @@ class YamlRuleBuilder:
         self.load_yaml_rules()
         logger.debug("will output %d rule(s)", len(self.ruleset))
         if self.ruleset:
-            if self.global_vars.get("import_all_modules_auto"):
-                for module in self.global_vars["import_modules_list"]:
-                    yield f'import "{module}"'
+            if self.global_context.get("import_all_modules_auto"):
+                for module in self.global_context["import_modules_list"]:
+                    if (
+                        self.template_name
+                        in self.global_context["rule_full_templates"]
+                    ):
+                        yield f'import "{module}"'
         for r in self.ruleset:
             yield self.apply_templating(self.rule_template, r)

@@ -69,7 +69,7 @@ def main():
     # If templates list was requested, print it out and exit
     if args.list_templates:
         templates = builder.list_rule_templates()
-        print(tabulate(templates, tablefmt="plain"))
+        print(tabulate(templates, headers="keys", tablefmt="simple"))
         parser.exit()
 
     # Build rules and emit as output

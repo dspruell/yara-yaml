@@ -18,3 +18,5 @@ rule_categories:
   HA: Header Analytic
   MC: Malicious Characteristic
   SC: Suspicious Characteristic
+rule_full_templates:
+  - default
