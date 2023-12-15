@@ -1,4 +1,4 @@
-"""yara-yaml CLI"""
+"""yara-yaml CLI."""
 
 import logging
 from argparse import ArgumentParser
@@ -25,8 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    "Main CLI function"
-
+    """Run the CLI."""
     parser = ArgumentParser()
     parser.add_argument(
         "rules_path",

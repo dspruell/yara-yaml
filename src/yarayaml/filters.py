@@ -1,4 +1,4 @@
-"""Jinja filters module"""
+"""Jinja filters module."""
 
 import re
 

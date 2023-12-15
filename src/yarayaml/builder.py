@@ -1,4 +1,4 @@
-"""Main code module"""
+"""Main code module."""
 
 import logging
 import os
@@ -28,7 +28,7 @@ YAML_SUFFIX = "yml"
 
 
 class YamlRuleBuilder:
-    """YARA rule builder.
+    """YARA YAML rule builder.
 
     Arguments
     ---------
@@ -42,6 +42,7 @@ class YamlRuleBuilder:
     """
 
     def __init__(self, rules_path, template):
+        """Create a new YAML YARA rule builder."""
         self.rules_path = rules_path
         self.template_name = template
 
@@ -98,7 +99,7 @@ class YamlRuleBuilder:
         return templates
 
     def apply_templating(self, template, context):
-        "Render specified template using the given context"
+        """Render specified template using the given context."""
 
         def load_rule_field(name):
             """Load rule context section for templatization.
