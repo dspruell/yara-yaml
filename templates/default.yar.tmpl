@@ -1,4 +1,4 @@
-{% if rule_private is defined %}private {% endif %}rule {{ rule_category }}_{{ rule_name }}{% if yara_tags %} : {{ yara_tags |join(' ') }}{% endif %}
+{% if rule_private is defined %}private {% endif %}rule {% if prefix_rule_category %}{{ rule_category }}_{% endif %}{{ rule_name }}{% if yara_tags %} : {{ yara_tags |join(' ') }}{% endif %}
 {
     meta:
         EventID = "{{ rule_id |default(autoassign_rule_id_on_commit) }}"

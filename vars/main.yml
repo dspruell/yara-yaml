@@ -1,6 +1,9 @@
 ---
 # Main variables file
 
+# If import_all_modules_auto is enabled, a set of module imports are
+# included for the ruleset regardless of their use in rules. The list of
+# modules to include is specified in import_modules_list.
 import_all_modules_auto: true
 import_modules_list:
   - dotnet
@@ -10,7 +13,16 @@ import_modules_list:
   - math
   - pe
   - time
+
+# If autoassign_rule_id_on_commit is set, it enables rule authors to use
+# a placeholder that can be substituted with a unique rule_id downstream
+# (in version control, post-processing, etc.). Rules may include an explicit
+# value in rule_id to not use this or to override this on a per-rule basis.
 autoassign_rule_id_on_commit: '%%INQUEST_AUTOASSIGN_RULE_ID_ON_COMMIT%%'
+
+# rule_categories defines a mapping of rule category prefixes to full
+# category names. By default, rule names are automatically prepended with
+# the prefix. This may be disabled using prefix_rule_category.
 rule_categories:
   EC: Evasion Characteristic
   FC: File Characteristic
@@ -18,5 +30,9 @@ rule_categories:
   HA: Header Analytic
   MC: Malicious Characteristic
   SC: Suspicious Characteristic
+prefix_rule_category: true
+
+# rule_full_templates should be set to a list of rule templates that render
+# complete rules, enabling the builder to omit module imports where needed.
 rule_full_templates:
   - default
