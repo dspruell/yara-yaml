@@ -13,6 +13,7 @@ try:
 except ImportError:
     from yaml import SafeLoader
 
+from . import RULE_MACRO_DIR, RULE_TEMPLATE_DIR, VARS_DIR
 from .filters import list_as_meta, regexpalt
 
 # List all imported filter functions to later be registered
@@ -20,9 +21,6 @@ jinja_filters_local = [list_as_meta, regexpalt]
 
 logger = logging.getLogger(__name__)
 
-RULE_TEMPLATE_DIR = "templates"
-VARS_DIR = "vars"
-RULE_MACRO_DIR = "vars/macros"
 RULE_TEMPLATE_SUFFIX = "yar.tmpl"
 YAML_SUFFIX = "yml"
 

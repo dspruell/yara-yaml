@@ -36,3 +36,9 @@ prefix_rule_category: true
 # complete rules, enabling the builder to omit module imports where needed.
 rule_full_templates:
   - default
+
+# macros_split_limit is used to determine the maximum number of values in
+# a macro that can be output in a single regular expression string before
+# needing to be split into multiple strings. This works in conjunction with
+# the regexalt filter when using the `strname` argument.
+macros_split_limit: 120
