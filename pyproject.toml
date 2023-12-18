@@ -7,7 +7,7 @@ packages = ["yarayaml"]
 
 [project]
 name = "yara-yaml"
-version = "0.0.13"
+version = "0.0.14"
 authors = [
     { name="Darren Spruell", email="phatbuckett@gmail.com" },
 ]
@@ -16,7 +16,6 @@ dependencies = [
     "Jinja2 >= 3.1",
     "PyYAML",
     "tabulate",
-    "wheel",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
