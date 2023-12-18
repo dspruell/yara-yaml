@@ -20,7 +20,7 @@ directory:
 
 2. Install the yara-yaml package and dependencies in the virtualenv.
 
-    `./env/bin/pip install src`
+    `./env/bin/pip install .`
 
 3. Use the command line tool to interface with the system.
 
