@@ -9,6 +9,7 @@
     of a cookie set via Keitaro TDS by a threat actor that distributes
     web traffic to malicious payloads.
   rule_category: HA
+  rule_status: Released
   rule_author: Darren Spruell
   rule_created: 2014-10-13
   rule_last_modified: 2016-12-09

@@ -1,1 +1,1 @@
-I={{ rule_id|default("auto") }}:{{ rule_revision }} A={{ rule_created }} M={{ rule_last_modified }} C={{ rule_scores.confidence }} S={{ rule_scores.severity }} N={{ rule_category }}_{{ rule_name }} YT={{ yara_tags |join(',') }} RT={{ rule_tags |join(',') }}
+I={{ rule_id|default("auto") }}:{{ rule_revision }} A={{ rule_created }} M={{ rule_last_modified }} C={{ rule_scores.confidence }} S={{ rule_scores.severity }} RS={{ rule_status }} N={{ rule_category }}_{{ rule_name }} YT={{ yara_tags |join(',') }} RT={{ rule_tags |join(',') }}
