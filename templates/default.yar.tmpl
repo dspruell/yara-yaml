@@ -13,6 +13,9 @@
         {%- for k, v in (references.public.urls |list_as_meta('Reference')).items() %}
         {{ k }} = "{{ v }}"
         {%- endfor %}
+        {%- for k, v in (references.public.samples |list_as_meta('Sample')).items() %}
+        {{ k }} = "{{ v }}"
+        {%- endfor %}
         {%- for k, v in (rule_tags |list_as_meta('Tag')).items() %}
         {{ k }} = "{{ v|replace('"', '\\"') }}"
         {%- endfor %}

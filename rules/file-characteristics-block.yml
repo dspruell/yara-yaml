@@ -24,6 +24,9 @@
         - T1608.005 # Stage Capabilities: Link Target
       urls:
         - https://safecomputing.umich.edu/be-aware/phishing-and-suspicious-email/shortened-url-security
+      samples:
+        - 0001bc3968111f3c2fd2c624992b1535d42860bfaddb57636325ef454b1434e4
+        - 00023932fd42ba86c6d97b7d9b7b7c94892d87368134ddf512a6eeedd8792982
     private:
       tracking_cases:
         - 'https://www.notion.so/inquest-portal/URL-Shorteners-deadbeefdeadbeefdeadbeefdeadbeef'
@@ -37,3 +40,5 @@
     {{ url_shortener_domains|regexpalt(strname="url_shortener_domains", modifiers=["nocase", "ascii", "wide"]) }}
   rule_condition: |
     any of them
+  testing_strategy:
+    - match_all_referenced_samples

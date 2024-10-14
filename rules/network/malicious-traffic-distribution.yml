@@ -31,6 +31,7 @@
   rule_tags:
     - inquest:intel-type="capability-intelligence"
     - inquest:rule-source="riskiq"
+    - inquest:capability="redirector"
     - inquest:threat-id="ehihm302"
     - inquest:threat-era="historical"
   rule_condition: |
